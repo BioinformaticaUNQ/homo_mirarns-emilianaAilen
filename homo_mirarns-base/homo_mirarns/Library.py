@@ -7,9 +7,9 @@ def hello_world():
 
 def lookup_miRNAs(code):
     if code.startswith('>'):
-        print('es una secuencia FATSA')
+        return 'es una secuencia FASTA'
     else:
-        print('es un gene id')
+        return 'es un gene id'
 
 
 sequence_data = "›SeqABCD [organism=Mus musculus] [strain=C57BL/6]"
