@@ -12,7 +12,7 @@ def lookup_miRNAs(code):
         return 'es un gene id'
 
 
-sequence_data = "›SeqABCD [organism=Mus musculus] [strain=C57BL/6]"
+""" sequence_data = "›SeqABCD [organism=Mus musculus] [strain=C57BL/6]"
 
 result_handle = NCBIWWW.qblast("blastn", "nt", sequence_data)
 print('termino')
@@ -21,3 +21,6 @@ print(result_handle)
 print(sequence_data)
 
 lookup_miRNAs('>asdasd')
+ """
+
+ 
