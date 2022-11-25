@@ -1,48 +1,61 @@
 from Bio.Blast import NCBIWWW, NCBIXML
+import subprocess, os
 
 
-def lookup_miRNAs(sequence, sequence_type, target_specie):
+def lookup_miRNAs(sequence_path, sequence_type, target_specie):
     if sequence_type == "FATSA":
-        get_counterparts(sequence)
+        get_counterparts(sequence_path)
     elif sequence_type == "MIRNA_FATSA":
-        get_counterparts(sequence)
+        get_miARNs(sequence_path)
     else: 
         "You're too young to party"
 
-def get_counterparts(sequence, E_VALUE_THRESH = 0.04):
+def get_counterparts(sequence_path, E_VALUE_THRESH = 0.04):
+    # Capturo la secuencia desde el archivo
+    sequence = get_sequence_from_file(sequence_path)
+
+    # Busco homologos
     result_handle  = NCBIWWW.qblast("blastn", "nt", sequence)
-    blast_record = NCBIXML.read(result_handle)
-    for alignment in blast_record.alignments:
-        for hsp in alignment.hsps:
-            if hsp.expect < E_VALUE_THRESH:
-                print("****Alignment****")
-                print("sequence:", alignment.title)
-                print("length:", alignment.length)
-                print("e value:", hsp.expect)
-                print(hsp.query[0:75] + "...")
-                print(hsp.match[0:75] + "...")
-                print(hsp.sbjct[0:75] + "...")   
-    return blast_record
+    blast_record = NCBIXML.read(result_handle) 
+
+    # Creo un fatsa para los homologos            
+    new_fatsa = "> " + blast_record.alignments[0] + "\n" +blast_record.alignments[0].hsps[0].query
+
+    # Lo guardo en un archivo para llamar al otro metodo
+    bashCommand = f"echo \"{new_fatsa}\" > new_fasta.fa"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    
+    #Llamo al otro metodo
+    get_miARNs("new_fasta.fa")
+
+def get_miARNs(sequence_path, db):
+    bashCommand = f"blastn -task blastn -query {sequence_path} -db /home/oem/new_folder/miRBase.fa -out blastn.txt"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+
+def get_sequence_from_file(file_path):
+    if os.path.isfile(file_path):
+        text_file = open(file_path, "r")
+        data = text_file.read()
+        text_file.close()
+    return data
 
 sequence_data = ">HO190899.1 Dn0d_1_1654 Dendrobium nobile un-vernalized cDNA library Dendrobium nobile cDNA 5', mRNA sequence  \n GGGGAGAGTAAAAGAATTGAGATTGAGACAAACAGCAGCAGTGGAAGGGGCATGCAGAGGAGCTCTATCAATTGGCAAGTGTGACAACGTCAAAGCTCCTATGTATGCCTCCTCCACTTCTGCTGCTAGCCTCCTATGCTACTGTTTGTTTTGATATTGTCAAGCGGCAACATCAAAGCTCTTAGTTTCTCTCGTTTATCTCTACTGTTAAGCATCTTAATCAGTGTTGGGTATGACTCTCGCTCCTATTTGATTAGATTTGAGAAACTTTTATATCGTTATACATATTATAGAAGTTTTATTTTAAATTTTTTTATAATCATGCGCGAATATAATAAAAGTTTTACCTACTTTTAATTTGTGATAATTTTAATTATCTTCTCTTGCTAGAAACTCTAATTTCATCACTGATCTTGACCTTTTGCTCATAAGCTCTCTGACTCGCTTTAAGGTTTTGTTTGAGACGGTTTTCTTATGCTTCTTAAAGCAGTTTTTTAGATTGAGAAGTTGATTTAAGAAACAGTAAGAATGACATCCCAAAGCCTAAGATTTCGTTTGGGATGGTTTTCTCACTGCTTTCTAGTAAAAAAATTCTGATTCAAGAAATTTTTATGCTGAAAAGCCGTTTTGTAAAGCAATAAGAAAGTTGTCTCAA"
 
-lookup_miRNAs(sequence_data, "MIRNA_FATSA", "asd")
+example_ = ">47 \n NNNNNNNNNNNNNNNNNNNNNNNNGNNNNNCGGGTNNCCNNNNGCTGGNTGNNNTGCTGACGAGTGGCGGACGGGTGAGTAATGTCTGGGAAACTGCCTGAAGGGGGGGGATTCCTACTGGCCAGGGTGGCTAATACCGGGTAACGTCGNNNGANCAAAGAGGGGGACCTTCGGGCCTCTTGCCATCACATGTGCCCGGATGGGATTAGCTTGTTGGTGAGGTAACGGCTCACCAAGGCGACGATCCCTAGCTGGTCTGAGAGGATGACCAGCCNCACTGGAACTGAGACACGGTCCCGACTCCTACGGGAGGCANCAGTGGGGAATATTGCTCTTGGGCGCAAGCCTGATGCAGCCATGCCGCGGGTATGAGGAAGGCCTTCGGTTTGTAAAGTACTTTCTCCGGGGAGGAAGGNGTNGTGGTGAATAACCGCTACANTTGANNCTNCCCGCNNAANAACCACCNGNTAACTCCNTGCNNNNNGCCGCGGTAATACGGANGGTGCAAGNGTTAATCGNANTTACTGNNTGTTGAGCGCACGNNGGCGGCCTGTCNNNTCTNATGTGAGATCCCCGGGCTCNCCCTGNNACCTGCATTCGNNNNNTGNNANGCTNGANTCTTGNNNNGNNGNGGNAGNAATTCCNNGTGTNNCGNNGAAATGCNNANAGATCTGNANANANNACNGGNGNCCAANGNNGNCCCCTGNTCTCNGACTGACGCNNGAGTGCTGAANNGTGNAGAGCGNACAGGATTANANNNCCNGNTAGNCCGNCNCCNCACACCNATGTCTACATGNGAGGNTNNNGNNNNNTGNGGCNNNNCNNTCCNNNAGCTNANGNNGTTNAANTANATCNNNCTNNNNCNNGCNNGGGGNCANNANGGGNNNAAANNTNNNNATNAATNTGACGGANNNNNCNNNNNNNNCNNNNNNANCATGNGGATTNANNNTNNNTNNNNNCNNNNNANAACCNNANNNNNNNNNNNNNNTNNNNNNNANNNTNNNNNNNTNNNNNNGNNNNCNNNNNNNNACTNNNNNNNCNNNNNNNNCANNGNNNNNNNNNNNANGNTNNNNNTGNNNNAANNNTGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNTNNNNNNNTNNNNNNNTNNNNTNNNNNNNNNNNNNNNNNNNNNNNTNNNNNNNNTCNNNNNN"
+#lookup_miRNAs("Salmonella.genome.fas", "MIRNA_FATSA", "asd")
 
+lookup_miRNAs("Salmonella.genome.fas", "MIRNA_FATSA", "asd")
 
-""" 
-
-result_handle = NCBIWWW.qblast("blastn", "nt", sequence_data)
-print('termino')
-print(result_handle)
-
-print(sequence_data)
-
-lookup_miRNAs('>asdasd')
-
-    if code.startswith('>'):
-        return 'es una secuencia FASTA'
-    else:
-        return 'es un gene id'
- """
-
- 
+## PRUEBAS
+"""for alignment in blast_record.alignments:
+print(alignment.title)
+for hsp in alignment.hsps:
+    if hsp.expect < E_VALUE_THRESH:
+        print("****Alignment****")
+        print("sequence:", alignment.title)
+        print("length:", alignment.length)
+        print("e value:", hsp.expect)
+        print(hsp.query[0:75] + "...")
+        print(hsp.match[0:75] + "...")
+        print(hsp.sbjct[0:75] + "...")"""  
