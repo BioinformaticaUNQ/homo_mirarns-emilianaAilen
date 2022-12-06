@@ -1,10 +1,11 @@
 from Bio.Blast import NCBIWWW, NCBIXML
 from Bio import Entrez, SeqIO
-from io import StringIO
+from pyfaidx import Fasta
 import subprocess
 import os
 import tarfile
 import glob
+
 
 #Entrez config
 Entrez.email = 'emiliana.ailen@hotmail.com'
@@ -77,46 +78,58 @@ def get_sequence_by_(seq_id):
 def lookup_miRNAs(search_prop, sequence_type, target_specie, selected_db):
     match sequence_type:
         case "FASTA":
-            get_counterparts(search_prop)
+            get_counterparts(search_prop, target_specie)
         case "MIRNA_FASTA":
             get_miARNs(search_prop, selected_db)
         case "GENE_ID":
-            get_counterparts_from_gene_id(search_prop, selected_db)
+            get_counterparts_from_gene_id(search_prop, selected_db, target_specie)
         case _:
             raise Exception("Yo have to provide a correct sequence type")
 
 
 
-def get_counterparts_from_gene_id(gene_id, db):
+def get_counterparts_from_gene_id(gene_id, db, target_specie):
     get_sequence_by_(gene_id)
-    get_counterparts("sequenceFound.fasta", db)
+    get_counterparts("sequenceFound.fasta", db, target_specie)
 
 
 
-def get_counterparts(sequence_path, db, E_VALUE_THRESH=0.04):
+def get_counterparts(sequence_path, db, specie, E_VALUE_THRESH=0.05):
     sequence = get_sequence_from_file(sequence_path)
 
     # Busco homologos
     result_handle = NCBIWWW.qblast("blastn", "nt", sequence)
     blast_record = NCBIXML.read(result_handle)
+    # obtengo gene id del que mas corresponda
+    alignment_found = get_best_alignment_ID(E_VALUE_THRESH, specie, blast_record.alignments)
+    # voy a la base de mirnas con ese gene id
+    get_result_from_DB(db, alignment_found)
 
-    # Creo un fasta para los homologos
-    fileOutput = open('./blast_out.fasta', "w")
-    alignment = blast_record.alignments[0]
-    hsp = alignment.hsps[0]
-    fileOutput.write(">" + str(alignment.title) + "\n")
-    fileOutput.write(str(hsp.query) + "\n")
+def get_result_from_DB(db, gene_id):
+    if(db == "TarBase" or db == "miRNEST"):
+        get_fasta_from_gz(GZ_DATABASE_FILE_NAMES[db])
+    data = Fasta(DATABASES[db])
+    keys = list(data.keys())
+    out_file = open("result.txt", "w")
+    for key in keys:
+        # To do: define strategies to get mirna by db
+        sequence = data[key][:].seq.split()
+        mirna = sequence[2]
+        seq_gene_Id = sequence[0]
+        if gene_id == str(seq_gene_Id):
+            out_file.write(mirna + "\n")
 
-    fileOutput.close()
-
-    # Llamo al otro metodo
-    get_miARNs('blast_out.fasta', db)
+def get_best_alignment_ID(E_VALUE_THRESH, specie, alignments):
+    for alignment in alignments:
+        for hsp in alignment.hsps:
+            if hsp.expect < E_VALUE_THRESH and specie in alignment.title:
+                print(alignment.title)
+                return alignment.title.split("|")[1]
 
 
 def get_miARNs(sequence_path, db):
     if(db == "TarBase" or db == "miRNEST"):
         get_fasta_from_gz(GZ_DATABASE_FILE_NAMES[db])
-    ##To do: define place to save databases or common route
     bashCommand = f"blastn -task blastn -query {sequence_path} -db  C:/Users/emili/Documents/homo_mirarns-emilianaAilen/{DATABASES[db]} -out blastn.txt"
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
@@ -134,9 +147,8 @@ sequence_data = ">HO190899.1 Dn0d_1_1654 Dendrobium nobile un-vernalized cDNA li
 
 example_ = ">47 \n NNNNNNNNNNNNNNNNNNNNNNNNGNNNNNCGGGTNNCCNNNNGCTGGNTGNNNTGCTGACGAGTGGCGGACGGGTGAGTAATGTCTGGGAAACTGCCTGAAGGGGGGGGATTCCTACTGGCCAGGGTGGCTAATACCGGGTAACGTCGNNNGANCAAAGAGGGGGACCTTCGGGCCTCTTGCCATCACATGTGCCCGGATGGGATTAGCTTGTTGGTGAGGTAACGGCTCACCAAGGCGACGATCCCTAGCTGGTCTGAGAGGATGACCAGCCNCACTGGAACTGAGACACGGTCCCGACTCCTACGGGAGGCANCAGTGGGGAATATTGCTCTTGGGCGCAAGCCTGATGCAGCCATGCCGCGGGTATGAGGAAGGCCTTCGGTTTGTAAAGTACTTTCTCCGGGGAGGAAGGNGTNGTGGTGAATAACCGCTACANTTGANNCTNCCCGCNNAANAACCACCNGNTAACTCCNTGCNNNNNGCCGCGGTAATACGGANGGTGCAAGNGTTAATCGNANTTACTGNNTGTTGAGCGCACGNNGGCGGCCTGTCNNNTCTNATGTGAGATCCCCGGGCTCNCCCTGNNACCTGCATTCGNNNNNTGNNANGCTNGANTCTTGNNNNGNNGNGGNAGNAATTCCNNGTGTNNCGNNGAAATGCNNANAGATCTGNANANANNACNGGNGNCCAANGNNGNCCCCTGNTCTCNGACTGACGCNNGAGTGCTGAANNGTGNAGAGCGNACAGGATTANANNNCCNGNTAGNCCGNCNCCNCACACCNATGTCTACATGNGAGGNTNNNGNNNNNTGNGGCNNNNCNNTCCNNNAGCTNANGNNGTTNAANTANATCNNNCTNNNNCNNGCNNGGGGNCANNANGGGNNNAAANNTNNNNATNAATNTGACGGANNNNNCNNNNNNNNCNNNNNNANCATGNGGATTNANNNTNNNTNNNNNCNNNNNANAACCNNANNNNNNNNNNNNNNTNNNNNNNANNNTNNNNNNNTNNNNNNGNNNNCNNNNNNNNACTNNNNNNNCNNNNNNNNCANNGNNNNNNNNNNNANGNTNNNNNTGNNNNAANNNTGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNTNNNNNNNTNNNNNNNTNNNNTNNNNNNNNNNNNNNNNNNNNNNNTNNNNNNNNTCNNNNNN"
 
-lookup_miRNAs("37222967", "GENE_ID", "asd", "Rumir")
-
-# get_fasta_from_gz('tarbase_v8_data')
+# lookup_miRNAs("37222967", "GENE_ID", "Paphiopedilum", "TarBase")
+get_result_from_DB("TarBase", "Y54E10A.16")
 
 # PRUEBAS
 """for alignment in blast_record.alignments:
@@ -152,3 +164,4 @@ for hsp in alignment.hsps:
         print(hsp.sbjct[0:75] + "...")"""
 
 """# seq_id = '37222967'"""
+"""get_result_from_DB("TarBase", "Y54E10A.16")"""
