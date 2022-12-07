@@ -27,7 +27,7 @@ The parameters you can use are the followings:
 |---|---|---|---|
 |'-p', '--path'| String | True | Path to file which contains fasta sequence or gen id|
 |'-t', '--type'| String | True | Searching method. Must be one of these: 'FASTA', 'MIRNA_FASTA', 'GENE_ID'|
-|'-s', '--specie'| String | True | 'Target Specie'|
+|'-s', '--specie'| String | True | Target specie |
 |'-d', '--db'| String | False | miARNs db where the searching will be performed. Must be one  of these: 'RUMIMIR', 'MIRNEST', 'MIRBASE', 'TARBASE' |
 |'-e', '--evalue| Float | False | Maximum e-value (default=0.05)|
 |'-i', '--percentage' | String | False | Minimun identity percentage (default=40.0)|
