@@ -25,6 +25,9 @@ parser.add_argument('-e', '--evalue', type=float,
 parser.add_argument('-i', '--percentage', type=float,
                     nargs='?', help='Minimun identity percentage', default=40.0)
 
+parser.add_argument('-z', '--entrezdb', type=str,
+                    nargs='?', help='Entrez db', default='nucleotide')
+
 args = parser.parse_args()
 
 # Entrez config
@@ -47,8 +50,8 @@ BLAST_DATABASES = {
 }
 
 
-def get_sequence_by_(seq_id):
-    handle = Entrez.efetch(db="nucleotide", id=seq_id,
+def get_sequence_by_(seq_id, entrez_db):
+    handle = Entrez.efetch(db=entrez_db, id=seq_id,
                            rettype="fasta", retmode="text")
     record = handle.read()
     out_handle = open('sequenceFound.fasta', 'w')
@@ -66,7 +69,7 @@ def get_db_name(sequence_type, selected_db):
     return db
 
 
-def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, evalue, perc_identity):
+def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, evalue, perc_identity, entrez_db):
     db = get_db_name(sequence_type, selected_db)
     match sequence_type:
         case "FASTA":
@@ -76,13 +79,13 @@ def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, eval
             get_miARNs(sequence_path, db, target_specie, evalue, perc_identity)
         case "GENE_ID":
             get_counterparts_from_gene_id(
-                sequence_path, db, target_specie, evalue, perc_identity)
+                sequence_path, db, target_specie, evalue, perc_identity, entrez_db)
         case _:
             raise Exception("Yo have to provide a correct sequence type")
 
 
-def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity):
-    get_sequence_by_(gene_id)
+def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity, entrez_db):
+    get_sequence_by_(gene_id, entrez_db)
     get_counterparts("sequenceFound.fasta", db,
                      target_specie, evalue, perc_identity)
 
@@ -148,4 +151,4 @@ def get_sequence_from_file(file_path):
 
 
 lookup_miRNAs(args.path, args.type, args.specie,
-              args.db, args.evalue, args.percentage)
+              args.db, args.evalue, args.percentage, args.entrezdb)
