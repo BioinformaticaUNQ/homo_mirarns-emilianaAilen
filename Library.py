@@ -91,7 +91,7 @@ def get_result_from_DB(db, gene_id):
     for line in data:
         splited = line.split(' ')
         mirna_position = 1
-        if(db == constants.PLAIN_DATABASES["MIRNEST"]):
+        if (db == constants.PLAIN_DATABASES["MIRNEST"]):
             mirna_position = 0
         mirna = splited[mirna_position]
         if line.__contains__(gene_id):
@@ -106,7 +106,7 @@ def get_best_alignment_ID(E_VALUE_THRESH, specie, alignments):
 
 
 def get_miARNs(sequence_path, db, specie, evalue, perc_identity):
-    bashCommand = f'blastn -task blastn -query {sequence_path} -db {db} -evalue {evalue} -perc_identity {perc_identity} -outfmt "6 sseqid pident evalue" -out blast.txt'
+    bashCommand = f'blastn -task blastn -query {sequence_path} -db {db} -evalue {evalue} -perc_identity {perc_identity} -outfmt "6 stitle pident evalue" -out blast.txt'
     subprocess.run(bashCommand, shell=True)
     blast_result = open("blast.txt", "r")
     hits = blast_result.readlines()
