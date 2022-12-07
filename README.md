@@ -20,6 +20,7 @@
 
 1. Open a terminal within the repo root directory
 2. Type the following command: `python3 Library.py [PARAMETERS]`
+3. After running the script a filed called "result.txt" will be generated in the same directory
 
 The parameters you can use are the followings:
 
