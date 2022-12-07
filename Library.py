@@ -35,15 +35,15 @@ Entrez.email = 'emiliana.ailen@hotmail.com'
 PLAIN_DATABASES = {
     "RUMIMIR": "",
     "TARBASE": "tarbase",
-    "MIRNEST": "",
+    "MIRNEST": "mirnest_targets",
     "MIRBASE": "",
 }
 
 BLAST_DATABASES = {
-    "RUMIMIR": "/db/rumimir",
+    "RUMIMIR": "rumimir",
     "TARBASE": "",
-    "MIRNEST": "/db/mirnest",
-    "MIRBASE": "/db/mirbase",
+    "MIRNEST": "mirnest",
+    "MIRBASE": "mirbase",
 }
 
 
@@ -61,7 +61,8 @@ def get_db_name(sequence_type, selected_db):
     else:
         db = BLAST_DATABASES[selected_db]
     if not db:
-        raise f"{selected_db} not available for {sequence_type} search method"
+        raise Exception(
+            f"{selected_db} DB is not available for {sequence_type} searching method")
     return db
 
 
