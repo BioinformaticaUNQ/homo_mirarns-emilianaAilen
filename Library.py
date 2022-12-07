@@ -31,9 +31,6 @@ args = parser.parse_args()
 Entrez.email = 'emiliana.ailen@hotmail.com'
 
 
-[PLAIN_DATABASES, BLAST_DATABASES, MIRNA_POSITION] = constants
-
-
 def get_sequence_by_(seq_id):
     handle = Entrez.efetch(db="nucleotide", id=seq_id,
                            rettype="fasta", retmode="text")
@@ -44,11 +41,12 @@ def get_sequence_by_(seq_id):
 
 def get_db_name(sequence_type, selected_db):
     if sequence_type == "FASTA" or sequence_type == "GENE_ID":
-        db = PLAIN_DATABASES[selected_db]
+        db = constants.PLAIN_DATABASES[selected_db]
     else:
-        db = BLAST_DATABASES[selected_db]
+        db = constants.BLAST_DATABASES[selected_db]
     if not db:
-        raise f"{selected_db} not available for {sequence_type} search method"
+        raise Exception(
+            f"{selected_db} DB is not available for {sequence_type} searching method")
     return db
 
 
@@ -89,7 +87,10 @@ def get_result_from_DB(db, gene_id):
     data = input.readlines()
     for line in data:
         splited = line.split(' ')
-        mirna = splited[MIRNA_POSITION[db]]
+        mirna_position = 1
+        if(db == constants.PLAIN_DATABASES["MIRNEST"]):
+            mirna_position = 0
+        mirna = splited[mirna_position]
         if line.__contains__(gene_id):
             out_file.write(mirna)
 
