@@ -16,6 +16,9 @@ parser.add_argument('-t', '--type', type=str,  required=True,
 parser.add_argument('-s', '--specie', type=str,
                     required=True, help='Target Specie')
 
+parser.add_argument('-m', '--entrezemail', type=str,
+                    nargs='?', required=True, help='Entrez account email')
+
 parser.add_argument('-d', '--db', type=str,  nargs='?',
                     choices=['RUMIMIR', 'MIRNEST', 'MIRBASE', 'TARBASE'], help='miRNA db', default='MIRNEST')
 
@@ -28,10 +31,14 @@ parser.add_argument('-i', '--percentage', type=float,
 parser.add_argument('-z', '--entrezdb', type=str,
                     nargs='?', help='Entrez db', default='nucleotide')
 
+parser.add_argument('-o', '--output', type=str,
+                    nargs='?', help='Output file path', default='result.txt')
+
+
 args = parser.parse_args()
 
 # Entrez config
-Entrez.email = 'emiliana.ailen@hotmail.com'
+Entrez.email = args.entrezemail
 
 
 def get_sequence_by_(seq_id, entrez_db):
@@ -53,12 +60,12 @@ def get_db_name(sequence_type, selected_db):
     return db
 
 
-def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, evalue, perc_identity, entrez_db):
+def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, evalue, perc_identity, entrez_db, output_path):
     db = get_db_name(sequence_type, selected_db)
     match sequence_type:
         case "FASTA":
             get_counterparts(sequence_path, db, target_specie,
-                             evalue, perc_identity)
+                             evalue, perc_identity, output_path)
         case "MIRNA_FASTA":
             get_miARNs(sequence_path, db, target_specie, evalue, perc_identity)
         case "GENE_ID":
@@ -74,19 +81,19 @@ def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_ident
                      target_specie, evalue, perc_identity)
 
 
-def get_counterparts(sequence_path, db, target_specie, evalue, perc_identity):
+def get_counterparts(sequence_path, db, target_specie, evalue, perc_identity, output_path):
     sequence = get_sequence_from_file(sequence_path)
     result_handle = NCBIWWW.qblast(
         "blastn", "nt", sequence, perc_ident=perc_identity)
     blast_record = NCBIXML.read(result_handle)
     alignment_found = get_best_alignment_ID(
         evalue, target_specie, blast_record.alignments)
-    get_result_from_DB(db, alignment_found)
+    get_result_from_DB(db, alignment_found, output_path)
 
 
-def get_result_from_DB(db, gene_id):
+def get_result_from_DB(db, gene_id, output_path):
     input = open(db, "r")
-    out_file = open("result.txt", "w")
+    out_file = open(output_path, "w")
     data = input.readlines()
     for line in data:
         splited = line.split(' ')
@@ -94,7 +101,7 @@ def get_result_from_DB(db, gene_id):
         if (db == constants.PLAIN_DATABASES["MIRNEST"]):
             mirna_position = 0
         mirna = splited[mirna_position]
-        if line.__contains__(gene_id):
+        if line.__contains__(str(gene_id)):
             out_file.write(mirna)
 
 
@@ -105,8 +112,8 @@ def get_best_alignment_ID(E_VALUE_THRESH, specie, alignments):
                 return alignment.title.split("|")[1]
 
 
-def get_miARNs(sequence_path, db, specie, evalue, perc_identity):
-    bashCommand = f'blastn -task blastn -query {sequence_path} -db {db} -evalue {evalue} -perc_identity {perc_identity} -outfmt "6 stitle pident evalue" -out blast.txt'
+def get_miARNs(sequence_path, db, specie, evalue, perc_identity, output_path):
+    bashCommand = f'blastn -task blastn -query {sequence_path} -db {db} -evalue {evalue} -perc_identity {perc_identity} -outfmt "6 stitle pident evalue" -out {output_path}'
     subprocess.run(bashCommand, shell=True)
     blast_result = open("blast.txt", "r")
     hits = blast_result.readlines()
@@ -132,4 +139,4 @@ def get_sequence_from_file(file_path):
 
 
 lookup_miRNAs(args.path, args.type, args.specie,
-              args.db, args.evalue, args.percentage, args.entrezdb)
+              args.db, args.evalue, args.percentage, args.entrezdb, args.output_path)
