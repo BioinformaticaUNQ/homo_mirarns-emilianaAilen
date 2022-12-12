@@ -1,8 +1,9 @@
+from Mirnas import get_best_alignment_ID
 from collections import namedtuple
 import unittest
 import sys
 sys.path.append(r'..')
-from Mirnas import get_best_alignment_ID
+
 
 class GetBestAlignmentId(unittest.TestCase):
 
@@ -20,8 +21,8 @@ class GetBestAlignmentId(unittest.TestCase):
         obtained_result = get_best_alignment_ID(
             maximum_evalue, specie, mocked_aligments)
 
-        self.assertEquals(expected_result, obtained_result)
-    
+        self.assertEqual(expected_result, obtained_result)
+
     def test_get_best_alignment_id_returns_none_if_the_record_name_does_not_contain_the_target_specie(self):
         mocked_aligments = [
             namedtuple('Record', "hsps title")(hsps=[
@@ -36,8 +37,8 @@ class GetBestAlignmentId(unittest.TestCase):
         obtained_result = get_best_alignment_ID(
             maximum_evalue, specie, mocked_aligments)
 
-        self.assertEquals(expected_result, obtained_result)
-    
+        self.assertEqual(expected_result, obtained_result)
+
     def test_get_best_alignment_id_returns_none_if_the_aligment_list_is_empty(self):
         empty_result = []
 
@@ -48,7 +49,7 @@ class GetBestAlignmentId(unittest.TestCase):
         obtained_result = get_best_alignment_ID(
             maximum_evalue, specie, empty_result)
 
-        self.assertEquals(expected_result, obtained_result)
+        self.assertEqual(expected_result, obtained_result)
 
     def test_get_best_alignment_id_returns_the_gene_id_when_all_conditions_are_met(self):
         mocked_aligments = [
@@ -64,7 +65,7 @@ class GetBestAlignmentId(unittest.TestCase):
         obtained_result = get_best_alignment_ID(
             maximum_evalue, specie, mocked_aligments)
 
-        self.assertEquals(expected_result, obtained_result)
+        self.assertEqual(expected_result, obtained_result)
 
 
 if __name__ == '__main__':

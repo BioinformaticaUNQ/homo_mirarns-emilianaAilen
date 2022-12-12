@@ -1,8 +1,10 @@
+from io import StringIO
 from Bio import Entrez
 from collections import namedtuple
 import unittest
 from unittest.mock import MagicMock, patch
-import io, os, sys
+import os
+import sys
 sys.path.append(r'..')
 from Mirnas import get_sequence_by_
 
@@ -26,13 +28,28 @@ class GetBestAlignmentId(unittest.TestCase):
         f = open("sequenceFound.fasta", "r")
         obtained_gene_id = f.read()
         f.close()
-        expected_gene_id= "123456"
+        expected_gene_id = "123456"
 
         self.assertEqual(expected_gene_id, obtained_gene_id)
 
-    def tearDown(self):
+    @patch('Bio.Entrez.efetch', **{'return_value.raiseError.side_effect': IOError("asdasd", 400)})
+    def test_when_get_best_alignment_id_fails_it_prints_an_appropriate_message(self, efetch):
+        capturedOutput = StringIO()
+        sys.stdout = capturedOutput
+
+        get_sequence_by_("any_gene_id", "any_db", "any_mail@mail.com")
+
+        expectedValue = "Cannot retrieve results from Entrez. Please try again.\n"
+        obtained_value = capturedOutput.getvalue()
+
+        self.assertEqual(expectedValue, obtained_value)
+
+    @classmethod
+    def tearDownClass(cls):
+        sys.stdout = sys.__stdout__
         os.remove('myfile.txt')
         os.remove('sequenceFound.fasta')
+
 
 if __name__ == '__main__':
     unittest.main()
