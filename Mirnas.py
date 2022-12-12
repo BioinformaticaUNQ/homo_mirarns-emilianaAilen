@@ -2,46 +2,12 @@ from Bio.Blast import NCBIWWW, NCBIXML
 from Bio import Entrez
 import subprocess
 import os
-import argparse
 import constants
 
-parser = argparse.ArgumentParser(description='miARNs')
 
-parser.add_argument('-p', '--path', type=str, required=True,
-                    help='Path to file which contains fasta sequence or gen id')
-
-parser.add_argument('-t', '--type', type=str,  required=True,
-                    choices=['FASTA', 'MIRNA_FASTA', 'GENE_ID'], help='Sequence type or Gen ID')
-
-parser.add_argument('-s', '--specie', type=str,
-                    required=True, help='Target Specie')
-
-parser.add_argument('-m', '--entrezemail', type=str,
-                    nargs='?', required=True, help='Entrez account email')
-
-parser.add_argument('-d', '--db', type=str,  nargs='?',
-                    choices=['RUMIMIR', 'MIRNEST', 'MIRBASE', 'TARBASE'], help='miRNA db', default='MIRNEST')
-
-parser.add_argument('-e', '--evalue', type=float,
-                    nargs='?', help='Maximum e-value', default=0.05)
-
-parser.add_argument('-i', '--percentage', type=float,
-                    nargs='?', help='Minimun identity percentage', default=40.0)
-
-parser.add_argument('-z', '--entrezdb', type=str,
-                    nargs='?', help='Entrez db', default='nucleotide')
-
-parser.add_argument('-o', '--output', type=str,
-                    nargs='?', help='Output file path', default='result.txt')
-
-
-args = parser.parse_args()
-
-# Entrez config
-Entrez.email = args.entrezemail
-
-
-def get_sequence_by_(seq_id, entrez_db):
+def get_sequence_by_(seq_id, entrez_db, entrezemail):
+    # Entrez config
+    Entrez.email = entrezemail
     handle = Entrez.efetch(db=entrez_db, id=seq_id,
                            rettype="fasta", retmode="text")
     record = handle.read()
@@ -60,7 +26,7 @@ def get_db_name(sequence_type, selected_db):
     return db
 
 
-def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, evalue, perc_identity, entrez_db, output_path):
+def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, evalue, perc_identity, entrez_db, output_path, entrezemail):
     db = get_db_name(sequence_type, selected_db)
     match sequence_type:
         case "FASTA":
@@ -70,13 +36,13 @@ def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, eval
             get_miARNs(sequence_path, db, target_specie, evalue, perc_identity)
         case "GENE_ID":
             get_counterparts_from_gene_id(
-                sequence_path, db, target_specie, evalue, perc_identity, entrez_db)
+                sequence_path, db, target_specie, evalue, perc_identity, entrez_db, entrezemail)
         case _:
             raise Exception("You have to provide a correct sequence type")
 
 
-def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity, entrez_db):
-    get_sequence_by_(gene_id, entrez_db)
+def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity, entrez_db, entrezemail):
+    get_sequence_by_(gene_id, entrez_db, entrezemail)
     get_counterparts("sequenceFound.fasta", db,
                      target_specie, evalue, perc_identity)
 
@@ -136,7 +102,3 @@ def get_sequence_from_file(file_path):
         data = text_file.read()
         text_file.close()
     return data
-
-
-lookup_miRNAs(args.path, args.type, args.specie,
-              args.db, args.evalue, args.percentage, args.entrezdb, args.output_path)

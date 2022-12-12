@@ -1,11 +1,14 @@
 # database file names
 PLAIN_DATABASES = {
-    "TARBASE": "./db/tarbase",
-    "MIRNEST": "./db2/mirnest_targets",
+    "RUMIMIR": "",
+    "TARBASE": "tarbase",
+    "MIRNEST": "mirnest_targets",
+    "MIRBASE": "",
 }
 
 BLAST_DATABASES = {
     "RUMIMIR": "rumimir",
+    "TARBASE": "",
     "MIRNEST": "mirnest",
     "MIRBASE": "mirbase",
 }
