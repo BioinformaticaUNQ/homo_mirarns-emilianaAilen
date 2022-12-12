@@ -8,11 +8,20 @@ import constants
 def get_sequence_by_(seq_id, entrez_db, entrezemail):
     # Entrez config
     Entrez.email = entrezemail
-    handle = Entrez.efetch(db=entrez_db, id=seq_id,
-                           rettype="fasta", retmode="text")
-    record = handle.read()
-    out_handle = open('sequenceFound.fasta', 'w')
-    out_handle.write(record.rstrip('\n'))
+    try:
+        handle = Entrez.efetch(db=entrez_db, id=seq_id,
+                               rettype="fasta", retmode="text")
+        record = handle.read()
+        out_handle = open('sequenceFound.fasta', 'w')
+        out_handle.write(record.rstrip('\n'))
+    except IOError as e:
+        if e.getcode() == 400:
+            print(f"There isn't any result for {seq_id} id")
+    except:
+        print("Cannot retrieve results from Entrez. Please try again.")
+    finally:
+        handle.close()
+        out_handle.close()
 
 
 def get_db_name(sequence_type, selected_db):
