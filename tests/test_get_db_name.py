@@ -66,6 +66,12 @@ class GetDBName(unittest.TestCase):
         obtained_name = get_db_name("MIRNA_FASTA", "MIRNEST")
         self.assertEqual(expected_name, obtained_name)
 
+    ## Not defined database
+
+    def test_get_db_name_mirna_fasta_tarbase(self):
+        with self.assertRaises(Exception):
+            self.assertRaises(get_db_name("MIRNA_FASTA", "NOT_DEFINED"))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -45,15 +45,15 @@ def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, eval
             get_miARNs(sequence_path, db, target_specie, evalue, perc_identity)
         case "GENE_ID":
             get_counterparts_from_gene_id(
-                sequence_path, db, target_specie, evalue, perc_identity, entrez_db, entrezemail)
+                sequence_path, db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path)
         case _:
             raise Exception("You have to provide a correct sequence type")
 
 
-def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity, entrez_db, entrezemail):
+def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path):
     get_sequence_by_(gene_id, entrez_db, entrezemail)
     get_counterparts("sequenceFound.fasta", db,
-                     target_specie, evalue, perc_identity)
+                     target_specie, evalue, perc_identity, output_path)
 
 
 def get_counterparts(sequence_path, db, target_specie, evalue, perc_identity, output_path):
@@ -61,30 +61,41 @@ def get_counterparts(sequence_path, db, target_specie, evalue, perc_identity, ou
     result_handle = NCBIWWW.qblast(
         "blastn", "nt", sequence, perc_ident=perc_identity)
     blast_record = NCBIXML.read(result_handle)
-    alignment_found = get_best_alignment_ID(
-        evalue, target_specie, blast_record.alignments)
-    get_result_from_DB(db, alignment_found, output_path)
+    alignments = blast_record.alignments
+    if len(alignments) == 0:
+        print("No alignments found")
+    ids = get_best_alignment_IDs(
+        evalue, target_specie, alignments)
+    get_result_from_DB(db, ids, output_path)
 
 
-def get_result_from_DB(db, gene_id, output_path):
+def get_result_from_DB(db, gene_ids, output_path):
     input = open(db, "r")
     out_file = open(output_path, "w")
     data = input.readlines()
     for line in data:
-        splited = line.split(' ')
-        mirna_position = 1
-        if (db == constants.PLAIN_DATABASES["MIRNEST"]):
-            mirna_position = 0
-        mirna = splited[mirna_position]
-        if line.__contains__(str(gene_id)):
-            out_file.write(mirna)
+        if any(word in line for word in gene_ids):
+            splited = line.split(' ')
+            mirna_position = 1
+            if (db == constants.PLAIN_DATABASES["MIRNEST"]):
+                mirna_position = 0
+            mirna = splited[mirna_position]
+            out_file.write(mirna + "\n")
+    if os.stat(output_path).st_size == 0:
+        for id in gene_ids:
+            out_file.write(id + "\n")
+        print("no gene id matches the ones in the given database, you can see the ids found in the output file")
 
 
-def get_best_alignment_ID(E_VALUE_THRESH, specie, alignments):
+def get_best_alignment_IDs(E_VALUE_THRESH, specie, alignments):
+    gene_ids = [] 
     for alignment in alignments:
         for hsp in alignment.hsps:
             if hsp.expect < E_VALUE_THRESH and specie in alignment.title:
-                return alignment.title.split("|")[1]
+                gene_ids.append(alignment.title.split("|")[1])
+    if len(gene_ids) == 0:
+        print("No matching gene Id found")
+    return gene_ids
 
 
 def get_miARNs(sequence_path, db, specie, evalue, perc_identity, output_path):

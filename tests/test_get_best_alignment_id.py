@@ -17,7 +17,7 @@ class GetBestAlignmentId(unittest.TestCase):
         maximum_evalue = 0.50
         specie = "a_specie"
 
-        expected_result = None
+        expected_result = []
         obtained_result = get_best_alignment_ID(
             maximum_evalue, specie, mocked_aligments)
 
@@ -33,7 +33,7 @@ class GetBestAlignmentId(unittest.TestCase):
         maximum_evalue = 0.97
         specie = "a_specie"
 
-        expected_result = None
+        expected_result = []
         obtained_result = get_best_alignment_ID(
             maximum_evalue, specie, mocked_aligments)
 
@@ -45,7 +45,7 @@ class GetBestAlignmentId(unittest.TestCase):
         maximum_evalue = 0.97
         specie = "a_specie"
 
-        expected_result = None
+        expected_result = []
         obtained_result = get_best_alignment_ID(
             maximum_evalue, specie, empty_result)
 
@@ -61,7 +61,7 @@ class GetBestAlignmentId(unittest.TestCase):
         maximum_evalue = 1
         specie = "a_specie"
 
-        expected_result = "0001"
+        expected_result = ["0001"]
         obtained_result = get_best_alignment_ID(
             maximum_evalue, specie, mocked_aligments)
 

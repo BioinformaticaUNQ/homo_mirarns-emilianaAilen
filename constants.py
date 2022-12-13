@@ -1,8 +1,8 @@
 # database file names
 PLAIN_DATABASES = {
     "RUMIMIR": "",
-    "TARBASE": "tarbase",
-    "MIRNEST": "mirnest_targets",
+    "TARBASE": "./db/tarbase",
+    "MIRNEST": "./db2/mirnest_targets",
     "MIRBASE": "",
 }
 
