@@ -33,7 +33,16 @@ The parameters you can use are the followings:
 |'-e', '--evalue| Float | False | Maximum e-value (default=0.05)|
 |'-i', '--percentage' | String | False | Minimun identity percentage (default=40.0)|
 |'-z', '--entrezdb'| String | False | Entrez db to perform gene id serachings (default='nucleotide')|
+|'-m', '--entrezemail'| String | True | Email account for entrez configuration|
+|'-o', '--output'| String | False | Output file path (default='result.txt')|
 
-Example:
+Examples:
 
-`python3 Library.py --path './Salmonella.genome.fas' --type MIRNA_FASTA --specie lin --db RUMIMIR --evalue 0.005 --percentage 50.0`
+MIRNA_FASTA case:
+`python3 Library.py --path './Salmonella.genome.fas' --type MIRNA_FASTA --specie 'lin' --db RUMIMIR --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
+
+GENE_ID case:
+`python3 get_mirnas.py --path '241989491' --type GENE_ID --specie 'Oryza sativa' --db MIRNEST --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
+
+FASTA case:
+`python3 get_mirnas.py --path './secuence.genome.fas' --type FASTA --specie 'Oryza sativa' --db MIRNEST --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
