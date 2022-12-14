@@ -30,7 +30,10 @@ parser.add_argument('-z', '--entrezdb', type=str,
 parser.add_argument('-o', '--output', type=str,
                     nargs='?', help='Output file path', default='result.txt')
 
+parser.add_argument('-b', '--blastdb', type=str,
+                    nargs='?', help='Blast search target database', default='nt')
+
 args = parser.parse_args()
 
 lookup_miRNAs(args.path, args.type, args.specie,
-              args.db, args.evalue, args.percentage, args.entrezdb, args.output, args.entrezemail)
+              args.db, args.evalue, args.percentage, args.entrezdb, args.output, args.entrezemail, args.blastdb)

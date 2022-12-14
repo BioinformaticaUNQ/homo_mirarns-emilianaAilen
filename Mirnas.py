@@ -35,31 +35,36 @@ def get_db_name(sequence_type, selected_db):
     return db
 
 
-def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, evalue, perc_identity, entrez_db, output_path, entrezemail):
+def lookup_miRNAs(input, sequence_type, target_specie, selected_db, evalue, perc_identity, entrez_db, output_path, entrezemail, blastdb):
     db = get_db_name(sequence_type, selected_db)
     match sequence_type:
         case "FASTA":
-            get_counterparts(sequence_path, db, target_specie,
-                             evalue, perc_identity, output_path)
+            get_counterparts(input, db, target_specie,
+                             evalue, perc_identity, output_path, blastdb)
         case "MIRNA_FASTA":
-            get_miARNs(sequence_path, db, target_specie, evalue, perc_identity)
+            get_miARNs(input, db, target_specie,
+                       evalue, perc_identity, output_path)
         case "GENE_ID":
             get_counterparts_from_gene_id(
-                sequence_path, db, target_specie, evalue, perc_identity, entrez_db, entrezemail)
+                input, db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb)
         case _:
             raise Exception("You have to provide a correct sequence type")
 
 
-def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity, entrez_db, entrezemail):
+def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb):
     get_sequence_by_(gene_id, entrez_db, entrezemail)
     get_counterparts("sequenceFound.fasta", db,
-                     target_specie, evalue, perc_identity)
+                     target_specie, evalue, perc_identity, output_path, blastdb)
 
 
-def get_counterparts(sequence_path, db, target_specie, evalue, perc_identity, output_path):
+def get_counterparts(sequence_path, db, target_specie, evalue, perc_identity, output_path, blastdb):
     sequence = get_sequence_from_file(sequence_path)
-    result_handle = NCBIWWW.qblast(
-        "blastn", "nt", sequence, perc_ident=perc_identity)
+    try:
+        result_handle = NCBIWWW.qblast(
+            "blastn", blastdb, sequence, perc_ident=perc_identity)
+    except:
+        raise Exception(
+            "The blast searching cannot be performed. Please verify your input parameters and sequence file.")
     blast_record = NCBIXML.read(result_handle)
     alignment_found = get_best_alignment_ID(
         evalue, target_specie, blast_record.alignments)
@@ -88,16 +93,16 @@ def get_best_alignment_ID(E_VALUE_THRESH, specie, alignments):
 
 
 def get_miARNs(sequence_path, db, specie, evalue, perc_identity, output_path):
-    bashCommand = f'blastn -task blastn -query {sequence_path} -db {db} -evalue {evalue} -perc_identity {perc_identity} -outfmt "6 stitle pident evalue" -out {output_path}'
+    bashCommand = f'blastn -task blastn -query {sequence_path} -db {db} -evalue {evalue} -perc_identity {perc_identity} -outfmt "6 stitle pident evalue" -out blast.txt'
     subprocess.run(bashCommand, shell=True)
     blast_result = open("blast.txt", "r")
     hits = blast_result.readlines()
-    write_result_from_hits(hits, specie)
+    write_result_from_hits(hits, specie, output_path)
     blast_result.close()
 
 
-def write_result_from_hits(blast_miARNs_hits, specie):
-    result = open("result.txt", "w")
+def write_result_from_hits(blast_miARNs_hits, specie, output_path):
+    result = open(output_path, "w")
     result.write("Description - Identity percentage - E-value\n")
     for hit in blast_miARNs_hits:
         if hit.__contains__(specie):
