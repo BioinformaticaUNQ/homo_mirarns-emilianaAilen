@@ -63,5 +63,5 @@ GTGCATTAGACTACATGTTTAGTGATAACAGCCTTGTTACTGCTATTATCATTATTATTATTATAAGATTGGCAGATGGC
 
 ## Run tests
 
-Command:
-`python -m unittest discover .`
+Open a terminal in the root directory and run the following command `python -m unittest discover .`
+
