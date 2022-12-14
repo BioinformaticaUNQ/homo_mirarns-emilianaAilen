@@ -51,9 +51,9 @@ def lookup_miRNAs(input, sequence_type, target_specie, selected_mirna_db, evalue
             raise Exception("You have to provide a correct sequence type")
 
 
-def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb):
+def get_counterparts_from_gene_id(gene_id, mirna_db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb):
     get_sequence_by_(gene_id, entrez_db, entrezemail)
-    get_counterparts("sequenceFound.fasta", db,
+    get_counterparts("sequenceFound.fasta", mirna_db,
                      target_specie, evalue, perc_identity, output_path, blastdb)
 
 
