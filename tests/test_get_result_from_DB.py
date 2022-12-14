@@ -11,13 +11,13 @@ class TestGetResultFromDb(unittest.TestCase):
         if os.path.isfile("./result.txt"):
             os.remove("result.txt")
 
-    def test_get_result_from_db_does_not_writes_anything_in_the_output_file_when_the_gen_id_does_not_match(self):
-
-        get_result_from_DB("tarbase", "non_existent_gene_id", "result.txt")
+    def test_get_result_from_db_raises_error_and_writes_found_ids_in_the_output_file_when_the_gen_id_does_not_match(self):
+        with self.assertRaisesRegex(ValueError, "no gene id matches the ones in the given database, you can see the ids found in the output file"):
+            self.assertRaisesRegex(get_result_from_DB("tarbase", ["non_existent_gene_id"], "result.txt"))
 
         f = open("./result.txt", "r")
 
-        expected_result = ""
+        expected_result = "non_existent_gene_id\n"
         obtained_result = f.read()
 
         f.close()
@@ -26,7 +26,7 @@ class TestGetResultFromDb(unittest.TestCase):
 
     def test_get_result_from_db_writes_the_mirna_name_in_the_output_file_when_the_gen_id_matches_and_the_selected_db_is_tarbase(self):
 
-        get_result_from_DB("tarbase", "0910001A06Rik", "result.txt")
+        get_result_from_DB("tarbase", ["0910001A06Rik"], "result.txt")
 
         f = open("./result.txt", "r")
 
@@ -39,7 +39,7 @@ class TestGetResultFromDb(unittest.TestCase):
 
     def test_get_result_from_db_writes_the_mirna_sequence_in_the_output_file_when_the_gen_id_matches_and_the_selected_db_is_mirnest(self):
 
-        get_result_from_DB("mirnest_targets", "188432925", "result.txt")
+        get_result_from_DB("mirnest_targets", ["188432925"], "result.txt")
 
         f = open("./result.txt", "r")
 

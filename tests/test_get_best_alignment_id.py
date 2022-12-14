@@ -1,13 +1,13 @@
-from Mirnas import get_best_alignment_ID
 from collections import namedtuple
 import unittest
 import sys
 sys.path.append(r'..')
+from Mirnas import get_best_alignment_IDs
 
 
 class TestGetBestAlignmentId(unittest.TestCase):
 
-    def test_get_best_alignment_id_returns_none_if_all_the_aligments_have_an_evalue_above_the_maximum(self):
+    def test_get_best_alignment_id_raises_an_error_if_all_the_aligments_have_an_evalue_above_the_maximum(self):
         mocked_aligments = [
             namedtuple('Record', "hsps title")(hsps=[
                 namedtuple('HSP', "expect")(expect=0.90),
@@ -17,13 +17,11 @@ class TestGetBestAlignmentId(unittest.TestCase):
         maximum_evalue = 0.50
         specie = "a_specie"
 
-        expected_result = None
-        obtained_result = get_best_alignment_ID(
-            maximum_evalue, specie, mocked_aligments)
+        with self.assertRaisesRegex(ValueError, "No matching gene Id found"):
+            self.assertRaisesRegex(get_best_alignment_IDs(
+                maximum_evalue, specie, mocked_aligments))
 
-        self.assertEqual(expected_result, obtained_result)
-
-    def test_get_best_alignment_id_returns_none_if_the_record_name_does_not_contain_the_target_specie(self):
+    def test_get_best_alignment_id_raises_an_error_if_the_record_name_does_not_contain_the_target_specie(self):
         mocked_aligments = [
             namedtuple('Record', "hsps title")(hsps=[
                 namedtuple('HSP', "expect")(expect=0.90),
@@ -33,23 +31,19 @@ class TestGetBestAlignmentId(unittest.TestCase):
         maximum_evalue = 0.97
         specie = "a_specie"
 
-        expected_result = None
-        obtained_result = get_best_alignment_ID(
-            maximum_evalue, specie, mocked_aligments)
+        with self.assertRaisesRegex(ValueError, "No matching gene Id found"):
+            self.assertRaisesRegex(get_best_alignment_IDs(
+                maximum_evalue, specie, mocked_aligments))
 
-        self.assertEqual(expected_result, obtained_result)
-
-    def test_get_best_alignment_id_returns_none_if_the_aligment_list_is_empty(self):
+    def test_get_best_alignment_id_raises_an_error_if_the_aligment_list_is_empty(self):
         empty_result = []
 
         maximum_evalue = 0.97
         specie = "a_specie"
 
-        expected_result = None
-        obtained_result = get_best_alignment_ID(
-            maximum_evalue, specie, empty_result)
-
-        self.assertEqual(expected_result, obtained_result)
+        with self.assertRaisesRegex(ValueError, "No matching gene Id found"):
+            self.assertRaisesRegex(get_best_alignment_IDs(
+                maximum_evalue, specie, empty_result))
 
     def test_get_best_alignment_id_returns_the_gene_id_when_all_conditions_are_met(self):
         mocked_aligments = [
@@ -61,8 +55,8 @@ class TestGetBestAlignmentId(unittest.TestCase):
         maximum_evalue = 1
         specie = "a_specie"
 
-        expected_result = "0001"
-        obtained_result = get_best_alignment_ID(
+        expected_result = ["0001"]
+        obtained_result = get_best_alignment_IDs(
             maximum_evalue, specie, mocked_aligments)
 
         self.assertEqual(expected_result, obtained_result)

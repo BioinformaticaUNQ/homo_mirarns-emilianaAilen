@@ -70,32 +70,47 @@ def get_counterparts(sequence_path, mirna_db, target_specie, evalue, perc_identi
         raise Exception(
             "The blast searching cannot be performed. Please verify your input parameters and sequence file.")
     blast_record = NCBIXML.read(result_handle)
-    alignment_found = get_best_alignment_ID(
-        evalue, target_specie, blast_record.alignments)
-    get_result_from_DB(mirna_db, alignment_found, output_path)
+    alignments = blast_record.alignments
+    if len(alignments) == 0:
+        raise ValueError("No alignments found")
+    ids = get_best_alignment_IDs(
+        evalue, target_specie, alignments)
+    get_result_from_DB(mirna_db, ids, output_path)
 
 
-def get_result_from_DB(db, gene_id, output_path):
+def get_result_from_DB(db, gene_ids, output_path):
     input = open(db, "r")
     out_file = open(output_path, "w")
     data = input.readlines()
+    MirnaFound = False
     for line in data:
-        splited = line.split()
-        mirna_position = 1
-        if (db == constants.PLAIN_DATABASES["MIRNEST"]):
-            mirna_position = 0
-        mirna = splited[mirna_position]
-        if line.__contains__(str(gene_id)):
+        if any(word in line for word in gene_ids):
+            MirnaFound = True
+            splited = line.split()
+            mirna_position = 1
+            if (db == constants.PLAIN_DATABASES["MIRNEST"]):
+                mirna_position = 0
+            mirna = splited[mirna_position]
             out_file.write(mirna + "\n")
-    out_file.close()
     input.close()
+    if not MirnaFound:
+        for id in gene_ids:
+            out_file.write(id + "\n")
+        out_file.close()
+        raise ValueError("no gene id matches the ones in the given database, you can see the ids found in the output file")
+    out_file.close()
 
-
-def get_best_alignment_ID(E_VALUE_THRESH, specie, alignments):
+def get_best_alignment_IDs(E_VALUE_THRESH, specie, alignments):
+    gene_ids = [] 
     for alignment in alignments:
         for hsp in alignment.hsps:
             if hsp.expect < E_VALUE_THRESH and specie in alignment.title:
-                return alignment.title.split("|")[1]
+                gen_id = alignment.title.split("|")[1]
+                if not gene_ids.__contains__(gen_id):
+                    gene_ids.append(gen_id)
+    if len(gene_ids) == 0:
+        raise ValueError("No matching gene Id found")
+    return gene_ids
 
 
 def get_miARNs(sequence_path, db, specie, evalue, perc_identity, output_path):
