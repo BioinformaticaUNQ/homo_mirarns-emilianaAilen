@@ -1,16 +1,16 @@
+from Mirnas import lookup_miRNAs
 from collections import namedtuple
 import unittest
 import sys
 import os
 sys.path.append(r'..')
-from Mirnas import get_miARNs
 
 """
     These tests use miRNAs databases, and you need to uncompress db.zip and db2.zip in the root directory in order to be able to run them
 """
 
 
-class TestGetBestAlignmentId(unittest.TestCase):
+class TestGetMirnas(unittest.TestCase):
 
     def setUp(self):
         f = open("input_sequence.fasta", "w", encoding="utf-8")
@@ -26,8 +26,9 @@ class TestGetBestAlignmentId(unittest.TestCase):
             os.remove("result.txt")
 
     def test_get_mirarns_returns_the_blast_hits_results_which_met_the_conditions(self):
-        get_miARNs("input_sequence.fasta", "rumimir",
-                   "chi", 0.05, 40, "result.txt")
+        lookup_miRNAs(input="input_sequence.fasta", sequence_type="MIRNA_FASTA", selected_mirna_db="RUMIMIR",
+                      target_specie="chi", evalue=0.05, perc_identity=40, output_path="result.txt",
+                      entrez_db="any", entrezemail="any@mail.com", blastdb="nt")
 
         f = open("./result.txt", "r")
 
@@ -39,8 +40,9 @@ class TestGetBestAlignmentId(unittest.TestCase):
         self.assertEqual(expected_result, obtained_result)
 
     def test_get_best_alignment_id_returns_none_if_all_the_aligments_have_an_evalue_above_the_maximum(self):
-        get_miARNs("input_sequence.fasta", "rumimir",
-                   "chi", 0.0000000001, 40, "result.txt")
+        lookup_miRNAs(input="input_sequence.fasta", sequence_type="MIRNA_FASTA", selected_mirna_db="RUMIMIR",
+                      target_specie="chi", evalue=0.0000000001, perc_identity=40, output_path="result.txt",
+                      entrez_db="any", entrezemail="any@mail.com", blastdb="nt")
 
         f = open("./result.txt", "r")
 
