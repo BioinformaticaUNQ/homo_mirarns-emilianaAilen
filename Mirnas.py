@@ -37,6 +37,9 @@ def get_db_name(sequence_type, selected_db):
 
 def lookup_miRNAs(input, sequence_type, target_specie, selected_mirna_db, evalue, perc_identity, entrez_db, output_path, entrezemail, blastdb):
     mirna_db = get_db_name(sequence_type, selected_mirna_db)
+    if (sequence_type == 'FASTA' or sequence_type == 'MIRNA_FASTA') and (not os.path.isfile(input)):
+        raise ValueError(
+            "The input file path is wrong. Please try again with a correct one")
     match sequence_type:
         case "FASTA":
             get_counterparts(input, mirna_db, target_specie,
@@ -48,7 +51,8 @@ def lookup_miRNAs(input, sequence_type, target_specie, selected_mirna_db, evalue
             get_counterparts_from_gene_id(
                 input, mirna_db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb)
         case _:
-            raise Exception("You have to provide a correct sequence type")
+            raise ValueError(
+                'You have to provide a correct sequence type: FASTA, MIRNA_FASTA or GENE_ID')
 
 
 def get_counterparts_from_gene_id(gene_id, mirna_db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb):

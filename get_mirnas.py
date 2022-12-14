@@ -1,5 +1,8 @@
 import argparse
 from Mirnas import lookup_miRNAs
+import sys
+
+sys.tracebacklimit = 0
 
 parser = argparse.ArgumentParser(description='miARNs')
 
