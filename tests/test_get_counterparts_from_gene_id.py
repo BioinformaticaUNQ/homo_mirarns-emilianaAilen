@@ -12,7 +12,7 @@ class TestLookupMirnas(unittest.TestCase):
     def test_get_sequence_by_and_get_counterpart_are_called_with_arguments(self, get_counterparts, get_sequence_by_):
 
         get_counterparts_from_gene_id("any_gene_id", "any_mirna_db", "any_target_specie", "any_evalue",
-                                      "any_perc_identity", "any_entrez_db", "any_output_path", "any_mail", "any_blastdb")
+                                      "any_perc_identity", "any_entrez_db", "any_mail", "any_output_path", "any_blastdb")
 
         get_sequence_by_.assert_called_with(
             "any_gene_id", "any_entrez_db", "any_mail")

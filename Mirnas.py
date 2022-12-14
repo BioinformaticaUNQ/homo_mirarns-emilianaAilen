@@ -115,4 +115,9 @@ def get_sequence_from_file(file_path):
         text_file = open(file_path, "r")
         data = text_file.read()
         text_file.close()
+        if not data:
+            raise ValueError(
+                f"There's no sequence on the following file: {file_path}")
+    else:
+        raise ValueError("The input file path is incorrect, please fix it.")
     return data
