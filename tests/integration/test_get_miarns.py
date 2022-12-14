@@ -9,6 +9,7 @@ from Mirnas import get_miARNs
     These tests use miRNAs databases, and you need to uncompress db.zip and db2.zip in the root directory in order to be able to run them
 """
 
+
 class TestGetBestAlignmentId(unittest.TestCase):
 
     def setUp(self):
@@ -24,20 +25,22 @@ class TestGetBestAlignmentId(unittest.TestCase):
         if os.path.isfile("blast.txt"):
             os.remove("result.txt")
 
-    # def test_get_mirarns_returns_the_blast_hits_results_which_met_the_conditions(self):
-    #     get_miARNs("input_sequence.fasta", "rumimir","chi", 0.05, 40, "result.txt")
+    def test_get_mirarns_returns_the_blast_hits_results_which_met_the_conditions(self):
+        get_miARNs("input_sequence.fasta", "rumimir",
+                   "chi", 0.05, 40, "result.txt")
 
-    #     f = open("./result.txt", "r")
+        f = open("./result.txt", "r")
 
-    #     expected_result = "Description - Identity percentage - E-value\nRum-chi-00001#chr1_811#Mammary_tissue	100.000	5.17e-07"
-    #     obtained_result = f.read()
+        expected_result = "Description - Identity percentage - E-value\nRum-chi-00001#chr1_811#Mammary_tissue	100.000	5.17e-07\n"
+        obtained_result = f.read()
 
-    #     f.close()
+        f.close()
 
-    #     self.assertEqual(expected_result, obtained_result)
-    
+        self.assertEqual(expected_result, obtained_result)
+
     def test_get_best_alignment_id_returns_none_if_all_the_aligments_have_an_evalue_above_the_maximum(self):
-        get_miARNs("input_sequence.fasta", "rumimir","chi", 0.0000000001, 40, "result.txt")
+        get_miARNs("input_sequence.fasta", "rumimir",
+                   "chi", 0.0000000001, 40, "result.txt")
 
         f = open("./result.txt", "r")
 
@@ -47,6 +50,7 @@ class TestGetBestAlignmentId(unittest.TestCase):
         f.close()
 
         self.assertEqual(expected_result, obtained_result)
+
 
 if __name__ == '__main__':
     unittest.main()
