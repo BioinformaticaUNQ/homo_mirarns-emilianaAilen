@@ -82,26 +82,32 @@ def get_result_from_DB(db, gene_ids, output_path):
     input = open(db, "r")
     out_file = open(output_path, "w")
     data = input.readlines()
+    MirnaFound = False
     for line in data:
         if any(word in line for word in gene_ids):
-            splited = line.split(' ')
+            MirnaFound = True
+            splited = line.split()
             mirna_position = 1
             if (db == constants.PLAIN_DATABASES["MIRNEST"]):
                 mirna_position = 0
             mirna = splited[mirna_position]
             out_file.write(mirna + "\n")
-    if os.stat(output_path).st_size == 0:
+    input.close()
+    if not MirnaFound:
         for id in gene_ids:
             out_file.write(id + "\n")
+        out_file.close()
         raise ValueError("no gene id matches the ones in the given database, you can see the ids found in the output file")
-
+    out_file.close()
 
 def get_best_alignment_IDs(E_VALUE_THRESH, specie, alignments):
     gene_ids = [] 
     for alignment in alignments:
         for hsp in alignment.hsps:
             if hsp.expect < E_VALUE_THRESH and specie in alignment.title:
-                gene_ids.append(alignment.title.split("|")[1])
+                gen_id = alignment.title.split("|")[1]
+                if not gene_ids.__contains__(gen_id):
+                    gene_ids.append(gen_id)
     if len(gene_ids) == 0:
         raise ValueError("No matching gene Id found")
     return gene_ids
