@@ -57,7 +57,7 @@ def get_counterparts_from_gene_id(gene_id, mirna_db, target_specie, evalue, perc
                      target_specie, evalue, perc_identity, output_path, blastdb)
 
 
-def get_counterparts(sequence_path, db, target_specie, evalue, perc_identity, output_path, blastdb):
+def get_counterparts(sequence_path, mirna_db, target_specie, evalue, perc_identity, output_path, blastdb):
     sequence = get_sequence_from_file(sequence_path)
     try:
         result_handle = NCBIWWW.qblast(
@@ -68,7 +68,7 @@ def get_counterparts(sequence_path, db, target_specie, evalue, perc_identity, ou
     blast_record = NCBIXML.read(result_handle)
     alignment_found = get_best_alignment_ID(
         evalue, target_specie, blast_record.alignments)
-    get_result_from_DB(db, alignment_found, output_path)
+    get_result_from_DB(mirna_db, alignment_found, output_path)
 
 
 def get_result_from_DB(db, gene_id, output_path):
@@ -76,13 +76,15 @@ def get_result_from_DB(db, gene_id, output_path):
     out_file = open(output_path, "w")
     data = input.readlines()
     for line in data:
-        splited = line.split(' ')
+        splited = line.split()
         mirna_position = 1
         if (db == constants.PLAIN_DATABASES["MIRNEST"]):
             mirna_position = 0
         mirna = splited[mirna_position]
         if line.__contains__(str(gene_id)):
-            out_file.write(mirna)
+            out_file.write(mirna + "\n")
+    out_file.close()
+    input.close()
 
 
 def get_best_alignment_ID(E_VALUE_THRESH, specie, alignments):
