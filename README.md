@@ -36,6 +36,7 @@ The parameters you can use are the followings:
 |'-z', '--entrezdb'| String | False | Entrez db to perform gene id serachings (default='nucleotide')|
 |'-m', '--entrezemail'| String | True | Email account for entrez configuration|
 |'-o', '--output'| String | False | Output file path (default='result.txt')|
+|'-b', '--blastdb'| String | False | Blast nucleotide target database. This parameter is used to perform a blast seraching when the script searching method is "FASTA" or "MIRNA_FASTA" (default='nt')|
 
 ## Use Cases
 
