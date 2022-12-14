@@ -27,7 +27,7 @@ The parameters you can use are the followings:
 
 | Parameter name   | Type | Required | Description |
 |---|---|---|---|
-|'-p', '--path'| String | True | Path to file which contains fasta sequence or gen id|
+|'-p', '--path'| String | True | Gene ID number or path to file which contains fasta sequence (depending on the serching type)|
 |'-t', '--type'| String | True | Searching method. Must be one of these: 'FASTA', 'MIRNA_FASTA', 'GENE_ID'|
 |'-s', '--specie'| String | True | Target specie |
 |'-d', '--db'| String | False | miARNs db where the searching will be performed. Must be one  of these: 'RUMIMIR', 'MIRNEST', 'MIRBASE', 'TARBASE' |
@@ -51,11 +51,7 @@ The input file should contain something like:
    UGGUGUCGUGAUGCUCU</blockquote>
 
 ## GENE_ID case:
-`python3 get_mirnas.py --path './gene_id.txt' --type GENE_ID --specie 'Oryza sativa' --db MIRNEST --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
-
-The input file should contain something like:
-
-   > 241989491
+`python3 get_mirnas.py --path '241989491' --type GENE_ID --specie 'Oryza sativa' --db MIRNEST --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
 
 ## FASTA case:
 `python3 get_mirnas.py --path './secuence.genome.fas' --type FASTA --specie 'Oryza sativa' --db MIRNEST --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
