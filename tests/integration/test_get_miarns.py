@@ -1,9 +1,8 @@
-from Mirnas import lookup_miRNAs
-from collections import namedtuple
 import unittest
 import sys
 import os
 sys.path.append(r'..')
+from Mirnas import lookup_miRNAs
 
 """
     These tests use miRNAs databases, and you need to uncompress db.zip and db2.zip in the root directory in order to be able to run them

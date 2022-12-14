@@ -51,7 +51,7 @@ class TestGetCounterparts(unittest.TestCase):
 
     @patch('Bio.Blast.NCBIWWW.qblast')
     @patch('Bio.Blast.NCBIXML.read')
-    def test_get_counterparts_returns_none_if_all_the_aligments_have_an_evalue_above_the_maximum(self, read, qblast):
+    def test_get_counterparts_throws_an_exception_if_all_the_aligments_have_an_evalue_above_the_maximum(self, read, qblast):
         qblast.return_value = "a_blast record"
         read.return_value = namedtuple('Record', "alignments")(
             alignments=[namedtuple('Record', "hsps title")(hsps=[
@@ -59,18 +59,10 @@ class TestGetCounterparts(unittest.TestCase):
                 namedtuple('HSP',  "expect")(expect=0.10)], title="gi|188432925| Rangpur lime root")
             ])
 
-        lookup_miRNAs(input="input_sequence.fasta", sequence_type="FASTA", selected_mirna_db="MIRNEST",
-                      target_specie="Rangpur lime root", evalue=0.05, perc_identity=40, output_path="result.txt",
-                      entrez_db="any", entrezemail="any@mail.com", blastdb="nt")
-
-        f = open("./result.txt", "r")
-
-        expected_result = ""
-        obtained_result = f.read()
-
-        f.close()
-
-        self.assertEqual(expected_result, obtained_result)
+        with self.assertRaisesRegex(ValueError, "No matching gene Id found"):
+            lookup_miRNAs(input="input_sequence.fasta", sequence_type="FASTA", selected_mirna_db="MIRNEST",
+                        target_specie="Rangpur lime root", evalue=0.05, perc_identity=40, output_path="result.txt",
+                        entrez_db="any", entrezemail="any@mail.com", blastdb="nt")
 
 
 if __name__ == '__main__':
