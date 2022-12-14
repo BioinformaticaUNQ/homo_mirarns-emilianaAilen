@@ -5,7 +5,7 @@ import sys
 sys.path.append(r'..')
 
 
-class GetBestAlignmentId(unittest.TestCase):
+class TestGetBestAlignmentId(unittest.TestCase):
 
     def test_get_best_alignment_id_returns_none_if_all_the_aligments_have_an_evalue_above_the_maximum(self):
         mocked_aligments = [

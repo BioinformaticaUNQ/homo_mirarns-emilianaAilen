@@ -35,38 +35,47 @@ def get_db_name(sequence_type, selected_db):
     return db
 
 
-def lookup_miRNAs(sequence_path, sequence_type, target_specie, selected_db, evalue, perc_identity, entrez_db, output_path, entrezemail):
-    db = get_db_name(sequence_type, selected_db)
+def lookup_miRNAs(input, sequence_type, target_specie, selected_mirna_db, evalue, perc_identity, entrez_db, output_path, entrezemail, blastdb):
+    mirna_db = get_db_name(sequence_type, selected_mirna_db)
+    if (sequence_type == 'FASTA' or sequence_type == 'MIRNA_FASTA') and (not os.path.isfile(input)):
+        raise ValueError(
+            "The input file path is wrong. Please try again with a correct one")
     match sequence_type:
         case "FASTA":
-            get_counterparts(sequence_path, db, target_specie,
-                             evalue, perc_identity, output_path)
+            get_counterparts(input, mirna_db, target_specie,
+                             evalue, perc_identity, output_path, blastdb)
         case "MIRNA_FASTA":
-            get_miARNs(sequence_path, db, target_specie, evalue, perc_identity)
+            get_miARNs(input, mirna_db, target_specie,
+                       evalue, perc_identity, output_path)
         case "GENE_ID":
             get_counterparts_from_gene_id(
-                sequence_path, db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path)
+                input, mirna_db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb)
         case _:
-            raise Exception("You have to provide a correct sequence type")
+            raise ValueError(
+                'You have to provide a correct sequence type: FASTA, MIRNA_FASTA or GENE_ID')
 
 
-def get_counterparts_from_gene_id(gene_id, db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path):
+def get_counterparts_from_gene_id(gene_id, mirna_db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb):
     get_sequence_by_(gene_id, entrez_db, entrezemail)
-    get_counterparts("sequenceFound.fasta", db,
-                     target_specie, evalue, perc_identity, output_path)
+    get_counterparts("sequenceFound.fasta", mirna_db,
+                     target_specie, evalue, perc_identity, output_path, blastdb)
 
 
-def get_counterparts(sequence_path, db, target_specie, evalue, perc_identity, output_path):
+def get_counterparts(sequence_path, mirna_db, target_specie, evalue, perc_identity, output_path, blastdb):
     sequence = get_sequence_from_file(sequence_path)
-    result_handle = NCBIWWW.qblast(
-        "blastn", "nt", sequence, perc_ident=perc_identity)
+    try:
+        result_handle = NCBIWWW.qblast(
+            "blastn", blastdb, sequence, perc_ident=perc_identity)
+    except:
+        raise Exception(
+            "The blast searching cannot be performed. Please verify your input parameters and sequence file.")
     blast_record = NCBIXML.read(result_handle)
     alignments = blast_record.alignments
     if len(alignments) == 0:
-        print("No alignments found")
+        raise ValueError("No alignments found")
     ids = get_best_alignment_IDs(
         evalue, target_specie, alignments)
-    get_result_from_DB(db, ids, output_path)
+    get_result_from_DB(mirna_db, ids, output_path)
 
 
 def get_result_from_DB(db, gene_ids, output_path):
@@ -84,7 +93,7 @@ def get_result_from_DB(db, gene_ids, output_path):
     if os.stat(output_path).st_size == 0:
         for id in gene_ids:
             out_file.write(id + "\n")
-        print("no gene id matches the ones in the given database, you can see the ids found in the output file")
+        raise ValueError("no gene id matches the ones in the given database, you can see the ids found in the output file")
 
 
 def get_best_alignment_IDs(E_VALUE_THRESH, specie, alignments):
@@ -94,21 +103,21 @@ def get_best_alignment_IDs(E_VALUE_THRESH, specie, alignments):
             if hsp.expect < E_VALUE_THRESH and specie in alignment.title:
                 gene_ids.append(alignment.title.split("|")[1])
     if len(gene_ids) == 0:
-        print("No matching gene Id found")
+        raise ValueError("No matching gene Id found")
     return gene_ids
 
 
 def get_miARNs(sequence_path, db, specie, evalue, perc_identity, output_path):
-    bashCommand = f'blastn -task blastn -query {sequence_path} -db {db} -evalue {evalue} -perc_identity {perc_identity} -outfmt "6 stitle pident evalue" -out {output_path}'
+    bashCommand = f'blastn -task blastn -query {sequence_path} -db {db} -evalue {evalue} -perc_identity {perc_identity} -outfmt "6 stitle pident evalue" -out blast.txt'
     subprocess.run(bashCommand, shell=True)
     blast_result = open("blast.txt", "r")
     hits = blast_result.readlines()
-    write_result_from_hits(hits, specie)
+    write_result_from_hits(hits, specie, output_path)
     blast_result.close()
 
 
-def write_result_from_hits(blast_miARNs_hits, specie):
-    result = open("result.txt", "w")
+def write_result_from_hits(blast_miARNs_hits, specie, output_path):
+    result = open(output_path, "w")
     result.write("Description - Identity percentage - E-value\n")
     for hit in blast_miARNs_hits:
         if hit.__contains__(specie):
@@ -121,4 +130,9 @@ def get_sequence_from_file(file_path):
         text_file = open(file_path, "r")
         data = text_file.read()
         text_file.close()
+        if not data:
+            raise ValueError(
+                f"There's no sequence on the following file: {file_path}")
+    else:
+        raise ValueError("The input file path is incorrect, please fix it.")
     return data
