@@ -8,8 +8,8 @@
    - `sudo apt install python3`
 3. Install pip.
    - `sudo apt install python3-pip`
-4. Install bio python
-   - `pip install biopython`
+4. Install bio python (version 1.79). The script will probably works with later versions, but we recommened installing the metioned one. Moreover, the whole package is not needed. The script only uses `Bio.Blast` and `Bio.Entrez`. So feel free to install only those two modules if you want.
+   - `pip install biopython==1.79`
 5. Install blast local -> https://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/
    - `sudo apt install ncbi-blast+`
 6. Clone the github repo
@@ -19,8 +19,9 @@
 ## How to use the cli
 
 1. Open a terminal within the repo root directory
-2. Type the following command: `python3 Library.py [PARAMETERS]`
-3. After running the script a filed called "result.txt" will be generated in the same directory
+2. Create a file with your fasta sequence / gene id number.
+3. Type the following command: `python3 Library.py [PARAMETERS]`
+4. After running the script a filed called "result.txt" will be generated in the same directory (this is the deafult outpout name, but it could be changed)
 
 The parameters you can use are the followings:
 
@@ -36,13 +37,29 @@ The parameters you can use are the followings:
 |'-m', '--entrezemail'| String | True | Email account for entrez configuration|
 |'-o', '--output'| String | False | Output file path (default='result.txt')|
 
-Examples:
+## Use Cases
 
-MIRNA_FASTA case:
-`python3 Library.py --path './Salmonella.genome.fas' --type MIRNA_FASTA --specie 'lin' --db RUMIMIR --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
+### MIRNA_FASTA case:
 
-GENE_ID case:
-`python3 get_mirnas.py --path '241989491' --type GENE_ID --specie 'Oryza sativa' --db MIRNEST --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
+Command:
 
-FASTA case:
+`python3 get_mirnas.py --path './chr1_2303_mature.fasta' --type MIRNA_FASTA --specie 'lin' --db RUMIMIR --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
+
+The input file should contain something like:
+
+   <blockquote> > Rum-oar-00023#chr1_2303_mature@@hsa-miR-138-2-3p#Adipose_tissue <br>
+   UGGUGUCGUGAUGCUCU</blockquote>
+
+## GENE_ID case:
+`python3 get_mirnas.py --path './gene_id.txt' --type GENE_ID --specie 'Oryza sativa' --db MIRNEST --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
+
+The input file should contain something like:
+
+   > 241989491
+
+## FASTA case:
 `python3 get_mirnas.py --path './secuence.genome.fas' --type FASTA --specie 'Oryza sativa' --db MIRNEST --evalue 0.005 --percentage 50.0 -m 'test@gmail.com'`
+
+The input file should contain something like:
+<blockquote> > ADN query <br>
+GTGCATTAGACTACATGTTTAGTGATAACAGCCTTGTTACTGCTATTATCATTATTATTATTATAAGATTGGCAGATGGCACCCTTGGTTAGAACATTGGACAAACTGCCTTACAACACTTTCCCTACAATGTTCAAATCCCACTGGTGTCAACTTAACCTTTCATCCTTCTTGGCTCAATAAACATCTGATTGGCCCTTTACCACTAAAATATTTGGGGTTACATGGATTCACTACACAAATTTGTGACCTTAAGCCAATATAAGGAAACATTGTTTCTATTATGTTTATAATTAAATTCGCTGTTGCTGGTATTGTTATTTACTGCTGCAGTCTTCTATAAATTATATTATCTAATAATAATAATAATAATAATAATTAAGATATTAATAATGGTTTCACATTTTGGCACAAAGCCTACAAGTTCGTGGGAGGGGGTAAGTTGATAATATCAACCACAGTGCTCAACTAGTAATTGTTTTATCAACGCTGAAAGGATAAGTCAATCCCAGCAGCATCTGAACTCGGAATGTAAAGTTGGAAGAAATACTGCTAAGCATTTTGTCTGGAACGGTAATGATTCTGCCAGATTGCTGCCTTAATAATAATAATGATGATGATGATGATGATGATGATAATAATAATAAAAAATAATAATAATGATCATAATAACTAAGCTTATATATATATATACATAAATTTATTTATGTATAACTATTTATATTTATATTTAATTATTACAAACTACTTGGATGTAATTAAATTTCTTTTAAAATT</blockquote>
