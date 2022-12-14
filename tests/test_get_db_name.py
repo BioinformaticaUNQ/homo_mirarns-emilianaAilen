@@ -4,7 +4,7 @@ import sys
 sys.path.append(r'..')
 
 
-class GetDBName(unittest.TestCase):
+class TestGetDBName(unittest.TestCase):
 
     # Fasta method
     def test_get_db_name_fasta_rumimir(self):

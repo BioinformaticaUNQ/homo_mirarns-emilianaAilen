@@ -1,15 +1,13 @@
 from io import StringIO
-from Bio import Entrez
-from collections import namedtuple
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import  patch
 import os
 import sys
 sys.path.append(r'..')
 from Mirnas import get_sequence_by_
 
 
-class GetBestAlignmentId(unittest.TestCase):
+class TestGetSequenceBy(unittest.TestCase):
 
     def setUp(self):
         f = open("myfile.txt", "w", encoding="utf-8")

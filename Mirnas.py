@@ -35,18 +35,18 @@ def get_db_name(sequence_type, selected_db):
     return db
 
 
-def lookup_miRNAs(input, sequence_type, target_specie, selected_db, evalue, perc_identity, entrez_db, output_path, entrezemail, blastdb):
-    db = get_db_name(sequence_type, selected_db)
+def lookup_miRNAs(input, sequence_type, target_specie, selected_mirna_db, evalue, perc_identity, entrez_db, output_path, entrezemail, blastdb):
+    mirna_db = get_db_name(sequence_type, selected_mirna_db)
     match sequence_type:
         case "FASTA":
-            get_counterparts(input, db, target_specie,
+            get_counterparts(input, mirna_db, target_specie,
                              evalue, perc_identity, output_path, blastdb)
         case "MIRNA_FASTA":
-            get_miARNs(input, db, target_specie,
+            get_miARNs(input, mirna_db, target_specie,
                        evalue, perc_identity, output_path)
         case "GENE_ID":
             get_counterparts_from_gene_id(
-                input, db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb)
+                input, mirna_db, target_specie, evalue, perc_identity, entrez_db, entrezemail, output_path, blastdb)
         case _:
             raise Exception("You have to provide a correct sequence type")
 
