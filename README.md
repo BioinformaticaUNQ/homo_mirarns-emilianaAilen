@@ -14,7 +14,7 @@
    - `sudo apt install ncbi-blast+`
 6. Clone the github repo
    - `git clone https://github.com/BioinformaticaUNQ/homo_mirarns-emilianaAilen.git`
-7. Extract the files from db and db files into the repo root directory
+7. Extract the files from **db.zip** and **db2.zip** files into the repo root directory
 
 ## How to use the cli
 
